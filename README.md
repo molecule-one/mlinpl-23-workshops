@@ -4,6 +4,13 @@ You are drug hunter. During the workshops, we will code various version of an ac
 
 Only easy to synthesize are accepted! You have limited # of calls but can synthesize any number
 
+## Agenda
+
+1. 9:00 - 9:20 Introduction 
+2. 9:30 - 10:30 Work on task 1,2,3 
+5. 10:30 - 11:00: What did we learn? Discussion
+6. 11:00 - 11:15 Break
+
 ## 1. Tasks
 
 Your goal will be to create various implementation of active learning. Technically, you will be tasked with code various implementations of the `Loop` base class.
@@ -16,6 +23,10 @@ Given that we have no prior knowledge about the target, we will start with rando
 ### 1.2. Exploration step
 
 Implement mutation based active learning.
+
+Tune hyperparameters to achieve 95% activity on the DRD2 protein in 1000 samples.
+
+Answer: What makes it work, what doesn't? Short discussion will follow.
 
 ### 1.3. ML guided active learning
 

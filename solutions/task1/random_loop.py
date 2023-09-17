@@ -17,7 +17,11 @@ class RandomLoop(Loop):
         super().__init__(base_dir, user_token, target)
 
     def propose_candidates(self, n_candidates: int) -> List[LeadCompound]:
-        smi = [self.space.try_sample()[0] for _ in range(n_candidates)]
+        smi = []
+        while len(smi) != n_candidates:
+            sampled_smi = self.space.try_sample()[0]
+            if sampled_smi not in smi:
+                smi.append(sampled_smi)
         return [
             LeadCompound(s, None, None) for s in smi
         ]

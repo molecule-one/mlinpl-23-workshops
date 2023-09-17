@@ -24,7 +24,7 @@ if __name__ == "__main__":
     random_base_dir = Path("solution_{}_search_budget={}".format('random', 1000))
     random_loop = RandomLoop(base_dir=random_base_dir)
     mutate_base_dir = Path("solution_{}_search_budget={}".format('mutate', 1000))
-    mutate_loop = MutateLoop(base_dir=mutate_base_dir, warmup=100, mutate_top_k=10)
+    mutate_loop = MutateLoop(base_dir=mutate_base_dir)
     budget_per_step = 100
 
     for name, loop in [("random", random_loop), ("mutate", mutate_loop)]:

@@ -21,9 +21,9 @@ console = Console()
 
 class MutateLoop(Loop):
     """Implementation of AL algorithm that mutates top compounds from the previous iterations."""
-    def __init__(self, base_dir: Path, warmup: int, mutate_top_k: int = 10, user_token=None, target="DRD2"):
+    def __init__(self, base_dir: Path, n_warmup_iterations: int = 1, mutate_top_k: int = 10, user_token=None, target="DRD2"):
         self.space = SmallZINC()
-        self.warmup = warmup
+        self.n_warmup_iterations = n_warmup_iterations
         self.mutate_top_k = mutate_top_k
         super().__init__(base_dir, user_token, target)
 
@@ -42,7 +42,7 @@ class MutateLoop(Loop):
         if n_candidates == 0:
             return []
 
-        if len(previous_results) < self.warmup:
+        if self.n_iterations < self.n_warmup_iterations:
             return self._propose_random(n_candidates)
 
         topK_ids = np.argsort([c.activity for c in previous_results])[-self.mutate_top_k:]
@@ -53,8 +53,14 @@ class MutateLoop(Loop):
         m = n_candidates // self.mutate_top_k + 1
         new_compounds = []
         for i in range(self.mutate_top_k):
-            for _ in range(m):
+            new_smiles = []
+            m_target = min(m, n_candidates - len(new_compounds)) # last batch might be smaller
+            while len(new_smiles) != m_target:
                 if len(new_compounds) == n_candidates:
                     break
-                new_compounds.append(decoder(mutate_selfie(selfies[i], max_molecules_len=100)[0]))
+                new_smi = decoder(mutate_selfie(selfies[i], max_molecules_len=100)[0])
+                if new_smi not in new_smiles and new_smi not in new_compounds:
+                    new_smiles.append(new_smi)
+            new_compounds += new_smiles
+        assert len(new_compounds) == n_candidates
         return [LeadCompound(smiles=c) for c in new_compounds]

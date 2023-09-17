@@ -88,6 +88,11 @@ class Loop():
 
         The results are saved in base_dir/[date]_lab_results.json."""
         candidates = copy.deepcopy(candidates)
+
+        smi = [c.smiles for c in candidates]
+        if len(set(smi)) != len(smi):
+            raise ValueError("Duplicate SMILES detected.")
+
         self._validate_smiles([c.smiles for c in candidates])
         # try to synthesize
         synthesizability_scores = self.evaluate_synthesizability(candidates)
