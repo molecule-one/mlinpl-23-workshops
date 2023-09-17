@@ -43,8 +43,10 @@ def run(budget=1000, target="DRD2", purge=False, which="random", steps=10):
                           user_token=None,
                           target=target)
     elif which == "ml":
-        base_loop = MutateLoop(base_dir=base_dir, user_token=None, target=target)
-        loop = MLLoop(base_dir=base_dir, base_loop=base_loop, target=target)
+        examples_per_step = budget // steps
+        n_warmup_iterations = 300 // examples_per_step
+        base_loop = MutateLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations, user_token=None, target=target)
+        loop = MLLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations*2, base_loop=base_loop, target=target)
     else:
         raise ValueError(f"Unknown which={which}")
 

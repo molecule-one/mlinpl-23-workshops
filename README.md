@@ -28,7 +28,11 @@ Tune hyperparameters to achieve 95% activity on the DRD2 protein in 1000 samples
 
 Answer: What makes it work, what doesn't? Short discussion will follow.
 
-### 1.3. ML guided active learning
+### 1.3. Compare random and mutation
+
+Implement comparison script/function
+
+### 1.4. ML guided active learning
 
 (TODO)
 
