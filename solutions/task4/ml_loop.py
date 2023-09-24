@@ -10,7 +10,7 @@ from rdkit.Chem import AllChem
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-from mlinpl_workshops.src.al_loop import Loop, LeadCompound
+from src.al_loop import Loop, LeadCompound
 from rich.console import Console
 
 console = Console()

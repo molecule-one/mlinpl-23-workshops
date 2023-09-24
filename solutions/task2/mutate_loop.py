@@ -8,8 +8,8 @@ from typing import List
 
 import numpy as np
 
-from mlinpl_workshops.src.al_loop import Loop, LeadCompound
-from mlinpl_workshops.src.compound_spaces import SmallZINC
+from src.al_loop import Loop, LeadCompound
+from src.compound_spaces import SmallZINC
 
 from selfies import encoder, decoder
 
