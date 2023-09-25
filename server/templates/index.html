@@ -98,9 +98,11 @@
         <thead>
             <tr>
                 <th>Token</th>
-                {% for key in results[0].metrics.keys() %}
-                    <th>{{ key }}</th>
-                {% endfor %}
+                {% if results %}
+                    {% for key in results[0].metrics.keys() %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                {% endif %}
                 <th>Total</th>
             </tr>
         </thead>

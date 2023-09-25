@@ -4,8 +4,8 @@ from flask import Flask, request, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit
 import hashlib
-
-from mlinpl_workshops.src.eval import virtual_screen_TDC
+import traceback
+from src.eval import virtual_screen_TDC
 
 import rdkit
 from rdkit import Chem
@@ -43,13 +43,6 @@ def compute_md5(data):
 def results_checksum():
     results = Result.query.all()
     return jsonify({"checksum": compute_md5(results)})
-
-@app.before_first_request
-def init_db():
-    db.create_all()
-
-
-import traceback
 
 @app.route('/score_compound', methods=['POST'])
 def score_compounds():
@@ -168,4 +161,6 @@ def test_connect():
     emit('update', {})
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     socketio.run(app, debug=True)
