@@ -52,21 +52,3 @@ CURL:
 curl -X POST -H "Content-Type: application/json" -d '{}' http://127.0.0.1:5000/reset
 ```
 
-## 2.3. Adding results
-
-Python:
-
-CURL:
-
-```commandline
-curl -X POST -H "Content-Type: application/json" \
--d '{
-    "token": "unique_token_1",
-    "metrics": {
-        "metric1": 10,
-        "metric2": 20
-    }
-}' \
-http://127.0.0.1:5000/add_result
-
-```

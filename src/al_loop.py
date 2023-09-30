@@ -52,8 +52,9 @@ class Loop():
         """A stateful function that proposes candidates based on prior experience"""
         pass
 
-    def evaluate_synthesizability(self, candidates: List[LeadCompound]) -> List[float]:
-        self._validate_smiles([c.smiles for c in candidates])
+    @classmethod
+    def evaluate_synthesizability(cls, candidates: List[LeadCompound]) -> List[float]:
+        cls._validate_smiles([c.smiles for c in candidates])
         return [compute_ertl_score(c.smiles) for c in candidates]
 
     def generate_visualization(self, iteration_id: Optional[int] = None):
