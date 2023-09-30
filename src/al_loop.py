@@ -37,8 +37,8 @@ class Loop():
     def __init__(self, base_dir: Union[str, Path], user_token: Optional[str] = None, target="DRD2"):
         """
         :param base_dir: directory where the results will be stored
-        :param user_token: user token for the server
-        :param target: target for the virtual screening
+        :param user_token: token used for the user (each user has up to some limit of calls for each target)
+        :param target: target for the virtual screening (DRD2, DRD2_server, ...)
         """
         self.base_dir = base_dir if isinstance(base_dir, Path) else Path(base_dir)
         console.log(f"Saving results to {self.base_dir}.")
@@ -82,7 +82,7 @@ class Loop():
             c = sum([json.load(open(f, "r")) for f in all_res], [])
         return list(map(LeadCompound.from_dict, c))
 
-    def test_in_lab_and_save(self, candidates: List[LeadCompound]):
+    def test_in_lab_and_save(self, candidates: List[LeadCompound], client: FlaskAppClient):
         """Test candidates in the lab and saves the outcome locally.
 
          The compounds are first checked for synthesizability using synthesize() function.
@@ -97,7 +97,7 @@ class Loop():
         self._validate_smiles([c.smiles for c in candidates])
         # try to synthesize
         synthesizability_scores = self.evaluate_synthesizability(candidates)
-        # compute scores
+        # compute scores (NOTE: implemented this way to be seamless for the user)
         if self.target == "DRD2":
             # this target is evaluated locally as it has unlimited # of calls
             metrics, activity_scores = run_virtual_screening([c.smiles for c in candidates], self.target)

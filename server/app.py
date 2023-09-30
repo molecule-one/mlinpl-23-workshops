@@ -4,7 +4,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 # CONFIGURATION
-TOP_N = 100
+TOP_N = 10
 SAS_THRESHOLD = 4.0
 MASTER_KEY = "YourSuperSecretMasterKey"
 # Define predefined call limits for each oracle_name. Adjust as needed.

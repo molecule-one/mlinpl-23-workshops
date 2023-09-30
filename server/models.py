@@ -7,6 +7,8 @@ from server.app import db
 class User(db.Model):
     id = db.Column(db.String(80), primary_key=True)
     oracle_calls = db.Column(db.PickleType, nullable=False)  # Dictionary with {oracle_name: count}
+    compound_scores = db.Column(db.PickleType, nullable=False)  # Dictionary with {target: list of values}
+    compound_sas_scores = db.Column(db.PickleType, nullable=False)  # Dictionary with {target: list of values}
 
 
 class Result(db.Model):
