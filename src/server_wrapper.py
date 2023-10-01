@@ -33,11 +33,6 @@ class FlaskAppClient:
                 self.console.print(f"[yellow]{tb}[/yellow]")
             response.raise_for_status()
 
-    def add_result(self, user_token, metrics):
-        payload = {"token": user_token, "metrics": metrics}
-        response = requests.post(f"{self.base_url}/add_result", json=payload)
-        return self._handle_response(response)
-
     def evaluate_and_add_result(self, compounds, oracle_name, user_token):
         payload = {
             "compounds": ",".join(compounds),
@@ -63,12 +58,6 @@ class FlaskAppClient:
 # Usage Example:
 if __name__ == "__main__":
     client = FlaskAppClient()
-
-    # Example for adding results
-    token = "your_unique_token"
-    metrics = {"metric1": 85, "metric2": 90}
-    response = client.add_result(token, metrics)
-    print(response)
 
     # Example for scoring compounds
     compounds = ["CC", "CCC"]
