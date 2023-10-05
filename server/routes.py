@@ -16,7 +16,7 @@ from rdkit import Chem
 from rich.console import Console
 
 from src.sas_score import compute_ertl_score
-from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD
+from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD, WORKSHOP_ORACLES
 from server.models import Result, User, Token
 from src.eval import virtual_screen_TDC
 
@@ -61,13 +61,16 @@ def score_compounds_and_update_leaderboard():
         oracle_name = request.json.get('oracle_name', "_DRD2")
         oracle_name = oracle_name.replace("_server", "")
 
+        if oracle_name not in WORKSHOP_ORACLES:
+            return jsonify({"status": "failure", "message": f"Expected oracle in {WORKSHOP_ORACLES}"}), 403
+
         # Check if the token is valid
         if not Token.check_valid_token(token):
             return jsonify({"status": "failure", "message": "Invalid token"}), 403
 
         user = User.query.get(token)
         if not user:
-            user = User(id=token, oracle_calls={})
+            user = User(id=token, oracle_calls={}, compound_scores={}, compound_sas_scores={})
             db.session.add(user)
         if oracle_name not in user.oracle_calls:
             user.oracle_calls[oracle_name] = 0
@@ -77,7 +80,10 @@ def score_compounds_and_update_leaderboard():
         if n_remaining_calls <= 0:
             return jsonify({"error": f"Call limit reached for oracle: {oracle_name}"}), 403
 
-        compounds = request.json.get('compounds').split(",")
+        compounds = request.json.get('compounds')
+        if compounds is None:
+            return jsonify({"error": "Missing 'compounds' field in the request."}), 500
+        compounds = compounds.split(",")
         if len(compounds) > n_remaining_calls:
             compounds = np.random.RandomState(777).choice(compounds, n_remaining_calls)
 
@@ -98,7 +104,10 @@ def score_compounds_and_update_leaderboard():
         # HACK: replaces "_server" which is special sequence to differntiate DRD2 from DRD2_server
         sas_scores = _evaluate_synthesizability(compounds)
         vs_scores = virtual_screen_TDC(compounds, oracle_name)
-        scores = [vs_score if sas_scores <= SAS_THRESHOLD else -1 for vs_score, sas_score in zip_equal(sas_scores, vs_scores)]
+        scores = [vs_score if sas_score <= SAS_THRESHOLD else -1 for vs_score, sas_score in zip_equal(vs_scores, sas_scores)]
+
+        if user.compound_scores is None:
+            user.compound_scores = {}
 
         if oracle_name not in user.compound_scores:
             user.compound_scores[oracle_name] = []
@@ -110,9 +119,12 @@ def score_compounds_and_update_leaderboard():
         # note: duplication of code of add_result
         metrics = {}
         for k in [TOP_N]:
-            top_ids = np.argsort(user.compound_scores[oracle_name])[-k:]
-            metrics[f"{oracle_name}_top_{k}"] = np.mean([user.compound_scores[oracle_name][i] for i in top_ids])
-            # metrics[f"{oracle_name}_sas_{k}"] = np.mean([user.compound_sas_scores[oracle_name][i] for i in top_ids])
+            for oracle_name in WORKSHOP_ORACLES:
+                if oracle_name in user.compound_scores:
+                    top_ids = np.argsort(user.compound_scores[oracle_name])[-k:]
+                    metrics[f"{oracle_name}_top_{k}"] = np.mean([user.compound_scores[oracle_name][i] for i in top_ids])
+                else:
+                    metrics[f"{oracle_name}_top_{k}"] = 0.0
 
         result = Result.query.get(token)
 
@@ -123,9 +135,10 @@ def score_compounds_and_update_leaderboard():
             result.metrics.update(metrics)
 
         db.session.commit()
-        return jsonify({"status": "success", "metrics": metrics}), 200
+        return jsonify({"status": "success", "metrics": metrics, "compound_scores": scores, "compound_sas_scores": sas_scores}), 200
 
     except Exception as e:
         # Get the traceback details and return it along with the error message
         tb = traceback.format_exc()
+        console.log(tb)
         return jsonify({"error": str(e), "traceback": tb}), 500

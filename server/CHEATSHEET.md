@@ -24,4 +24,6 @@ http://127.0.0.1:5000/add_result
 
 ```
 
-You can also use `tests/add_some_results.sh`.
+3. How to examine database
+
+Install SQLite Browser and see `results.db` in the working directory.

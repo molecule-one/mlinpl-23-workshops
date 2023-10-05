@@ -2,7 +2,6 @@
 # Script to be run before tests
 set -e
 
-conda activate de-novo-workshop
 python server/start.py
 
 curl -X POST -H "Content-Type: application/json" \

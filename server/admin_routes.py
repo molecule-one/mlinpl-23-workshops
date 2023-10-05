@@ -10,7 +10,7 @@ from flask_socketio import emit
 from rich.console import Console
 
 from server.app import socketio, db, app, MASTER_KEY
-from server.models import Result, Token
+from server.models import Result, Token, User
 
 console = Console()
 
@@ -48,13 +48,15 @@ def add_result():
 
 @app.route('/reset', methods=['POST'])
 def reset():
+    db.session.query(User).delete()
     db.session.query(Result).delete()
+    db.session.query(Token).delete()
     db.session.commit()
 
     # initiate database with 50 tokens of kind test-0, ... test-10
     tokens = []
     for i in range(50):
-        new_token = "test-" + str(id)
+        new_token = "test-" + str(i)
         tokens.append(new_token)
         db.session.add(Token(token=new_token))
 

@@ -6,13 +6,11 @@ import requests
 
 from src.utils import Oracles
 
-APP_URL = "http://localhost:5000"
-
 class FlaskAppClient:
     ERROR_KEY = "error"
     TRACEBACK_KEY = "traceback"
 
-    def __init__(self, base_url="http://localhost:5000"):
+    def __init__(self, base_url="http://127.0.0.1:5000"):
         self.base_url = base_url
         self.console = Console()
 
@@ -42,31 +40,28 @@ class FlaskAppClient:
         response = requests.post(f"{self.base_url}/evaluate_and_add_result", json=payload)
         return self._handle_response(response)
 
-    def score_compound(self, compounds, oracle_name, user_token):
+    def score_compounds_and_update_leaderboard(self, compounds, oracle_name, user_token):
         payload = {
-            "compound": compounds,
+            "compounds": ",".join(compounds),
             "oracle_name": oracle_name,
             "token": user_token
         }
-        response = requests.post(f"{self.base_url}/score_compound", json=payload)
+        response = requests.post(f"{self.base_url}/score_compounds_and_update_leaderboard", json=payload)
         return self._handle_response(response)
-
-    def score_compounds(self, compounds: List, oracle_name: Oracles, token):
-        return [self.score_compound(c, oracle_name, token)['score'] for c in compounds]
-
 
 # Usage Example:
 if __name__ == "__main__":
     client = FlaskAppClient()
+    token = "test-0"
 
     # Example for scoring compounds
     compounds = ["CC", "CCC"]
     oracle_name = "DRD2"
-    response = client.score_compounds(compounds, oracle_name, token)
+    response = client.score_compounds_and_update_leaderboard(compounds, oracle_name, token)
     print(response)
 
     # Example of error handling
     compounds = ["Cxxxxx"]
     oracle_name = "DRD2"
-    response = client.score_compounds(compounds, oracle_name, token)
+    response = client.score_compounds_and_update_leaderboard(compounds, oracle_name, token)
     print(response)

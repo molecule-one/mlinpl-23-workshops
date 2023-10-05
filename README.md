@@ -41,9 +41,13 @@ What is the largest
 
 ## 2. Working with the server
 
-Assumes you have a running instance accessible at `localhost:5000`.
+Assumes you have a running instance accessible at `127.0.0.1:5000`.
 
 ### 2.1. Starting the server
+
+```commandline
+PYTHONPATH=$PYTHONPATH:`pwd` python server/start.py
+```
 
 ### 2.2. Reseting
 
