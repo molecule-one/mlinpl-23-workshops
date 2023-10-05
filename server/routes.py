@@ -14,6 +14,7 @@ from flask import request, render_template, jsonify
 from more_itertools import zip_equal
 from rdkit import Chem
 from rich.console import Console
+from sqlalchemy.orm.attributes import flag_modified
 
 from src.sas_score import compute_ertl_score
 from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD, WORKSHOP_ORACLES
@@ -108,22 +109,37 @@ def score_compounds_and_update_leaderboard():
 
         if user.compound_scores is None:
             user.compound_scores = {}
+            user.compound_sas_scores = {}
+
+        current_compound_score_dict = user.compound_scores
+        current_compound_sas_score_dict = user.compound_sas_scores
 
         if oracle_name not in user.compound_scores:
-            user.compound_scores[oracle_name] = []
-            user.compound_sas_scores[oracle_name] = []
+            current_compound_score_dict[oracle_name] = []
+            current_compound_sas_score_dict[oracle_name] = []
 
-        user.compound_scores[oracle_name] += scores
-        user.compound_sas_scores[oracle_name] += sas_scores
+        current_compound_score_dict[oracle_name] += scores
+        current_compound_sas_score_dict[oracle_name] += sas_scores
+
+        # this forces alchemy to commit the change
+        user.compound_scores = current_compound_score_dict
+        user.compound_sas_scores = current_compound_sas_score_dict
+        flag_modified(user, 'compound_scores')
+        flag_modified(user, 'compound_sas_scores')
+
+        db.session.commit()
 
         # note: duplication of code of add_result
         metrics = {}
         for k in [TOP_N]:
             for oracle_name in WORKSHOP_ORACLES:
                 if oracle_name in user.compound_scores:
+                    console.log(oracle_name)
+                    console.log(user.compound_scores[oracle_name])
                     top_ids = np.argsort(user.compound_scores[oracle_name])[-k:]
                     metrics[f"{oracle_name}_top_{k}"] = np.mean([user.compound_scores[oracle_name][i] for i in top_ids])
                 else:
+                    console.log("Missing")
                     metrics[f"{oracle_name}_top_{k}"] = 0.0
 
         result = Result.query.get(token)
@@ -132,7 +148,8 @@ def score_compounds_and_update_leaderboard():
             result = Result(id=token, metrics=metrics)
             db.session.add(result)
         else:
-            result.metrics.update(metrics)
+            result.metrics = {**result.metrics, **metrics} # this forces alchemy to commit the change
+        flag_modified(result, 'metrics') # this forces alchemy to commit the change
 
         db.session.commit()
         return jsonify({"status": "success", "metrics": metrics, "compound_scores": scores, "compound_sas_scores": sas_scores}), 200

@@ -82,7 +82,7 @@ class Loop():
             c = sum([json.load(open(f, "r")) for f in all_res], [])
         return list(map(LeadCompound.from_dict, c))
 
-    def test_in_lab_and_save(self, candidates: List[LeadCompound], client: FlaskAppClient):
+    def test_in_lab_and_save(self, candidates: List[LeadCompound]):
         """Test candidates in the lab and saves the outcome locally.
 
          The compounds are first checked for synthesizability using synthesize() function.
@@ -108,13 +108,14 @@ class Loop():
                     c.activity = -1
                 c.synth_score = s_score
         else:
-            raise NotImplementedError("Only DRD2 target is supported for now.")
-            # TODO: Implement me
             if self.user_token is None:
                 raise ValueError("Please provide user_token to test in the lab.")
             client = FlaskAppClient()
-            response = client.score_compounds(candidates, self.target, self.user_token)
+            response = client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], self.target, self.user_token)
             console.log(response)
+            for c, a_score, s_score in zip_equal(candidates, response['compound_scores'], response['compound_sas_scores']):
+                c.activity = a_score
+                c.synth_score = s_score
 
         # save results
         save_filename = "{}.json".format(self.n_iterations)

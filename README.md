@@ -56,3 +56,10 @@ CURL:
 curl -X POST -H "Content-Type: application/json" -d '{}' http://127.0.0.1:5000/reset
 ```
 
+## 3. Running solution
+
+### 3.1 Run random search on server
+
+```commandline
+ python solutions/run.py -b 1000 -w random -t DRD2_server -u test-0
+```

@@ -100,7 +100,8 @@
                 <th>Token</th>
                 {% if results %}
                     {% for key in results[0].metrics.keys() %}
-                        <th>{{ key }}</th>
+                        <!-- Remove 'top10' from the name -->
+                        <th>{{ key[0:-7] }}</th>
                     {% endfor %}
                 {% endif %}
                 <th>Total</th>
@@ -111,9 +112,9 @@
                 <tr>
                     <td>{{ result.id }}</td>
                     {% for value in result.metrics.values() %}
-                        <td>{{ value }}</td>
+                        <td>{{ value|round(3) }}</td>
                     {% endfor %}
-                    <td>{{ result.metrics|sum }}</td>
+                    <td>{{ result.metrics|sum|round(3) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

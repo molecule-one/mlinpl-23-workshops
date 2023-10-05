@@ -18,15 +18,15 @@ from solutions.task4.ml_loop import MLLoop
 
 console = Console()
 
-def run(budget=1000, target="DRD2", purge=False, which="random", steps=10):
-    base_dir = Path("solution_{}_search_budget={}".format(which, budget))
+def run(budget=1000, target="DRD2", purge=False, which="random", steps=10, user_token='test-0'):
+    base_dir = Path("solution_{}_search_budget={}_target={}".format(which, budget, target))
 
     if purge:
         shutil.rmtree(base_dir, ignore_errors=True)
 
     if which == "random":
         loop = RandomLoop(base_dir=base_dir,
-                          user_token=None,
+                          user_token=user_token,
                           target=target)
     elif which == "mutate":
         # NOTE: Exploration is key for mutate to work
@@ -34,19 +34,19 @@ def run(budget=1000, target="DRD2", purge=False, which="random", steps=10):
         n_warmup_iterations = 300 // examples_per_step
         loop = MutateLoop(base_dir=base_dir,
                           n_warmup_iterations=n_warmup_iterations,
-                          user_token=None,
+                          user_token=user_token,
                           target=target)
     elif which == "mutate_low_exp":
         # NOTE: Exploration is key for mutate to work
         loop = MutateLoop(base_dir=base_dir,
                           n_warmup_iterations=1,
-                          user_token=None,
+                          user_token=user_token,
                           target=target)
     elif which == "ml":
         examples_per_step = budget // steps
         n_warmup_iterations = 300 // examples_per_step
-        base_loop = MutateLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations, user_token=None, target=target)
-        loop = MLLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations*2, base_loop=base_loop, target=target)
+        base_loop = MutateLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations, user_token=user_token, target=target)
+        loop = MLLoop(base_dir=base_dir, n_warmup_iterations=n_warmup_iterations*2, base_loop=base_loop, user_token=user_token, target=target)
     else:
         raise ValueError(f"Unknown which={which}")
 
