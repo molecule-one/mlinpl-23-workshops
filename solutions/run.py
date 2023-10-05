@@ -19,7 +19,7 @@ from solutions.task4.ml_loop import MLLoop
 console = Console()
 
 def run(budget=1000, target="DRD2", purge=False, which="random", steps=10, user_token='test-0'):
-    base_dir = Path("solution_{}_search_budget={}_target={}".format(which, budget, target))
+    base_dir = Path("solution_{}_search_budget={}_target={}_user={}".format(which, budget, target, user_token))
 
     if purge:
         shutil.rmtree(base_dir, ignore_errors=True)
