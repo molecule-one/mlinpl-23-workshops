@@ -14,21 +14,15 @@ from server.models import Result, Token, User
 
 console = Console()
 
-def _compute_md5(data):
-    m = hashlib.md5()
-    m.update(str(data).encode('utf-8'))
-    return m.hexdigest()
-
-
-@app.route("/results-checksum", methods=['GET'])
-def results_checksum():
-    results = Result.query.all()
-    return jsonify({"checksum": _compute_md5(results)})
 
 @app.route('/add_result', methods=['POST'])
 def add_result():
     token = request.json.get('token')
     metrics = request.json.get('metrics')
+
+    master_key = request.json.get('master_key')
+    if master_key != MASTER_KEY:  # Replace with your secret key
+        return jsonify({"status": "failure", "message": "Invalid master key"}), 403
 
     # Check if the token is valid
     if not Token.check_valid_token(token):

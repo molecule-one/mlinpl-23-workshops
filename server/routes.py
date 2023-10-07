@@ -4,7 +4,7 @@ Routes of the application:
 * /leaderboard: shows up the leaderboard
 * /score_compounds_and_update_leaderboard: scores provided compounds and updates the leaderboard
 """
-
+import hashlib
 import traceback
 from typing import List
 
@@ -23,6 +23,11 @@ from src.eval import virtual_screen_TDC
 
 console = Console()
 
+
+def _compute_md5(data):
+    m = hashlib.md5()
+    m.update(str(data).encode('utf-8'))
+    return m.hexdigest()
 
 def _validate_smiles(candidates: List[str]):
     """Helper function to check if the SMILES are valid"""
@@ -159,3 +164,9 @@ def score_compounds_and_update_leaderboard():
         tb = traceback.format_exc()
         console.log(tb)
         return jsonify({"error": str(e), "traceback": tb}), 500
+
+
+@app.route("/results-checksum", methods=['GET'])
+def results_checksum():
+    results = Result.query.all()
+    return jsonify({"checksum": _compute_md5(results)})

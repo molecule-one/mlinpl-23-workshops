@@ -15,7 +15,7 @@ import rdkit
 from more_itertools import zip_equal
 from rich.console import Console
 
-from bin.visualize_compounds import generate_html_molgrid
+from visualize_compounds import generate_html_molgrid
 from src.eval import run_virtual_screening
 from src.sas_score import compute_ertl_score
 from src.server_wrapper import FlaskAppClient
