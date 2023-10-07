@@ -2,6 +2,9 @@
 
 You are drug hunter. During the workshops, we will code various version of an active learning loop that orders experiments in the lab.
 
+You will have three "trials". One is unlimited. Second is limited to 10000 calls (quite a lot!). The last one is limited
+to 1000 calls.
+
 Only easy to synthesize are accepted! You have limited # of calls but can synthesize any number
 
 ## Agenda

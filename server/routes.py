@@ -68,18 +68,21 @@ def score_compounds_and_update_leaderboard():
         oracle_name = oracle_name.replace("_server", "")
 
         if oracle_name not in WORKSHOP_ORACLES:
-            return jsonify({"status": "failure", "message": f"Expected oracle in {WORKSHOP_ORACLES}"}), 403
+            return jsonify({"status": "failure", "error": f"Expected oracle in {WORKSHOP_ORACLES}"}), 403
 
         # Check if the token is valid
         if not Token.check_valid_token(token):
-            return jsonify({"status": "failure", "message": "Invalid token"}), 403
+            return jsonify({"status": "failure", "error": "Invalid token"}), 403
 
         user = User.query.get(token)
         if not user:
             user = User(id=token, oracle_calls={}, compound_scores={}, compound_sas_scores={})
             db.session.add(user)
+
+        oracle_calls = user.oracle_calls
+
         if oracle_name not in user.oracle_calls:
-            user.oracle_calls[oracle_name] = 0
+            oracle_calls[oracle_name] = 0
 
         n_remaining_calls = call_limits.get(oracle_name, float('inf')) - user.oracle_calls[oracle_name]
 
@@ -94,7 +97,9 @@ def score_compounds_and_update_leaderboard():
             compounds = np.random.RandomState(777).choice(compounds, n_remaining_calls)
 
         # update the limit
-        user.oracle_calls[oracle_name] += len(compounds)
+        oracle_calls[oracle_name] += len(compounds)
+        user.oracle_calls = oracle_calls # to force sqlalchemy to update the dict
+        flag_modified(user, 'oracle_calls')
 
         for compound in compounds:
             try:

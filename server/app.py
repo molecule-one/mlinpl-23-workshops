@@ -9,8 +9,9 @@ TOP_N = 10
 SAS_THRESHOLD = 4.0
 MASTER_KEY = os.environ.get("MASTER_KEY", "YourSuperSecretMasterKey")
 # Define predefined call limits for each oracle_name. Adjust as needed.
-call_limits = {
-    "DRD2": float('inf')  # Example: 10 calls for DRD2 oracle. Add other oracles and limits as needed.
+call_limits = { # default is +inf
+    "JNK3": 10000,
+    "GSK3β": 1000
 }
 WORKSHOP_ORACLES = ['DRD2', 'JNK3', 'GSK3β']
 

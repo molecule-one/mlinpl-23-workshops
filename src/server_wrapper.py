@@ -19,6 +19,7 @@ class FlaskAppClient:
             response_data = response.json()
         except json.JSONDecodeError:
             self.console.print("[red]Failed to parse server response as JSON[/red]")
+            self.console.print("Response from server: " + str(response))
             response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code.
 
         if response.status_code == 200:
