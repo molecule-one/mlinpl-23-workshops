@@ -10,16 +10,20 @@ class User(db.Model):
     compound_scores = db.Column(db.PickleType, nullable=False)  # Dictionary with {target: list of values}
     compound_sas_scores = db.Column(db.PickleType, nullable=False)  # Dictionary with {target: list of values}
 
+    # Back reference from Token to User
+    tokens = db.relationship('Token', backref='user', lazy=True)
 
 class Result(db.Model):
-    id = db.Column(db.String(80), primary_key=True)
+    user_id = db.Column(db.String(80), primary_key=True)
     metrics = db.Column(db.PickleType, nullable=False)
 
 
 class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String(128), unique=True, nullable=False)
+    token = db.Column(db.String(128), unique=True, primary_key=True, nullable=False)
     creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Foreign Key to link Token to User
+    user_id = db.Column(db.String(80), db.ForeignKey('user.id'), nullable=False)
 
     @classmethod
     def check_valid_token(cls, token_str):

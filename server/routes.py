@@ -2,6 +2,7 @@
 Routes of the application:
 
 * /leaderboard: shows up the leaderboard
+* /all_results: gets results of all users (same as displayed in the leaderboard)
 * /score_compounds_and_update_leaderboard: scores provided compounds and updates the leaderboard
 """
 import hashlib
@@ -49,10 +50,17 @@ def _evaluate_synthesizability(candidates: List[str]) -> List[float]:
     _validate_smiles([c for c in candidates])
     return [compute_ertl_score(c) for c in candidates]
 
+def _get_results_sorted() -> List[Result]:
+    results = Result.query.all()
+    return list(sorted(results, key=lambda x: -sum(x.metrics.values())))
+@app.route('/all_results', methods=['POST', 'GET'])
+def all_results():
+    sorted_results = _get_results_sorted()
+    return jsonify([{"metrics": x.metrics, "user": x.user_id} for x in sorted_results]), 200
+
 @app.route('/leaderboard')
 def index():
-    results = Result.query.all()
-    sorted_results = sorted(results, key=lambda x: -sum(x.metrics.values()))
+    sorted_results = _get_results_sorted()
     return render_template('index.html', results=sorted_results)
 
 @app.route("/score_compounds_and_update_leaderboard", methods=['POST'])
@@ -68,15 +76,23 @@ def score_compounds_and_update_leaderboard():
         oracle_name = oracle_name.replace("_server", "")
 
         if oracle_name not in WORKSHOP_ORACLES:
-            return jsonify({"status": "failure", "error": f"Expected oracle in {WORKSHOP_ORACLES}"}), 403
+            return jsonify({"error": f"Expected oracle in {WORKSHOP_ORACLES}"}), 403
 
         # Check if the token is valid
         if not Token.check_valid_token(token):
-            return jsonify({"status": "failure", "error": "Invalid token"}), 403
+            return jsonify({"error": "Invalid token"}), 403
 
-        user = User.query.get(token)
+        token_obj = Token.query.get(token)
+
+        print(token)
+        print(token_obj)
+
+        if token_obj is None:
+            return jsonify({"error": "Invalid token"}), 403
+
+        user = User.query.get(token_obj.user_id)
         if not user:
-            user = User(id=token, oracle_calls={}, compound_scores={}, compound_sas_scores={})
+            user = User(id=token_obj.user_id, oracle_calls={}, compound_scores={}, compound_sas_scores={})
             db.session.add(user)
 
         oracle_calls = user.oracle_calls
@@ -152,17 +168,17 @@ def score_compounds_and_update_leaderboard():
                     console.log("Missing")
                     metrics[f"{oracle_name}_top_{k}"] = 0.0
 
-        result = Result.query.get(token)
+        result = Result.query.get(user.id)
 
         if not result:
-            result = Result(id=token, metrics=metrics)
+            result = Result(user_id=user.id, metrics=metrics)
             db.session.add(result)
         else:
             result.metrics = {**result.metrics, **metrics} # this forces alchemy to commit the change
         flag_modified(result, 'metrics') # this forces alchemy to commit the change
 
         db.session.commit()
-        return jsonify({"status": "success", "metrics": metrics, "compound_scores": scores, "compound_sas_scores": sas_scores}), 200
+        return jsonify({"metrics": metrics, "compound_scores": scores, "compound_sas_scores": sas_scores}), 200
 
     except Exception as e:
         # Get the traceback details and return it along with the error message

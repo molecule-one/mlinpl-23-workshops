@@ -10,6 +10,9 @@ import shutil
 from pathlib import Path
 from typing import List
 
+import pytest
+from requests.exceptions import HTTPError
+
 import numpy as np
 
 from src.al_loop import LeadCompound
@@ -39,27 +42,61 @@ def test_submitting_compounds_to_workshop_oracles():
         assert "compound_sas_scores" in response
 
 
-def test_random_exploration_gets_reasonable_score():
+def _run_random_exploration(protein, token="test-1", steps=10):
     """Simple random exploration of ZINC. Should get above >0.5 score on each oracle."""
     base_dir = Path("tmp")
-    for protein in ['DRD2_server', 'JNK3', 'GSK3β']:
-        shutil.rmtree(base_dir, ignore_errors=True)
-        loop = RandomLoop(base_dir=base_dir,
-                              user_token='test-1',
-                              target=protein)
-        all_result: List[LeadCompound] = []
-        budget_per_step = 100
-        for step in range(10):
-            console.print(f"[red]Step {step}[/red]")
-            candidates = loop.propose_candidates(budget_per_step)
-            loop.test_in_lab_and_save(candidates)
-            result: List[LeadCompound] = loop.load(iteration_id=step)
-            all_result += result
-            all_result_sorted = sorted(all_result, key=lambda x: x.activity, reverse=True)
-            metrics = {"top10": np.mean([x.activity for x in all_result_sorted[:10]]),
-                            "top10_synth": np.mean([x.synth_score for x in all_result_sorted[:10]])}
-            console.log(metrics)
+    shutil.rmtree(base_dir, ignore_errors=True)
+    loop = RandomLoop(base_dir=base_dir,
+                          user_token=token,
+                          target=protein)
+    all_result: List[LeadCompound] = []
+    budget_per_step = 100
+    for step in range(steps):
+        console.print(f"[red]Step {step}[/red]")
+        candidates = loop.propose_candidates(budget_per_step)
+        loop.test_in_lab_and_save(candidates)
+        result: List[LeadCompound] = loop.load(iteration_id=step)
+        all_result += result
+        all_result_sorted = sorted(all_result, key=lambda x: x.activity, reverse=True)
+        metrics = {"top10": np.mean([x.activity for x in all_result_sorted[:10]]),
+                        "top10_synth": np.mean([x.synth_score for x in all_result_sorted[:10]])}
+        console.log(metrics)
 
+    return metrics
+
+
+def test_random_exploration_gets_reasonable_score():
+    for protein in ['DRD2_server', 'JNK3', 'GSK3β']:
+        metrics = _run_random_exploration(protein=protein)
         assert metrics['top10'] > 0.1, "Random search should identify reasonable compounds"
 
-test_random_exploration_gets_reasonable_score()
+def test_leaderboard_ordering_and_user_names():
+    _run_random_exploration('DRD2_server', 'test-2', steps=1)
+    _run_random_exploration('DRD2_server', 'test-3', steps=1)
+    client = FlaskAppClient()
+    all_results = client.all_results()
+    users = [r['user'] for r in all_results]
+    print(users)
+    assert 'user-2' in users
+    assert 'user-3' in users
+    all_proteins = ['DRD2', 'JNK3', 'GSK3β']
+    sums = [sum([all_results[0]['metrics'][p + "_top_10"]  for p in all_proteins]) for r in all_results]
+    assert sums[0] == max(sums), "First result in the leaderboard should be the maximum sum of top10 scores"
+
+def test_call_limits():
+    base_dir = Path("tmp")
+    shutil.rmtree(base_dir, ignore_errors=True)
+    loop = RandomLoop(base_dir=base_dir,
+                      user_token='test-3',
+                      target='GSK3β')
+    # exhaust limit
+    candidates = loop.propose_candidates(1000)
+    loop.test_in_lab_and_save(candidates)
+    # run one time more
+    client = FlaskAppClient()
+    candidates = loop.propose_candidates(100)
+
+    with pytest.raises(HTTPError):
+        client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token='test-3', oracle_name='GSK3β')
+
+test_call_limits()

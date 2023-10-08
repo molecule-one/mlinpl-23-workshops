@@ -31,7 +31,7 @@ def add_result():
     result = Result.query.get(token)
 
     if not result:
-        result = Result(id=token, metrics=metrics)
+        result = Result(user_id=token, metrics=metrics)
         db.session.add(result)
     else:
         result.metrics = metrics
@@ -48,11 +48,33 @@ def reset():
     db.session.commit()
 
     # initiate database with 50 tokens of kind test-0, ... test-10
+    # these tokens are used in tests
     tokens = []
     for i in range(50):
+        new_user = User(
+            id="user-" + str(i),
+            oracle_calls={},
+            compound_scores={},
+            compound_sas_scores={}
+        )
+
         new_token = "test-" + str(i)
         tokens.append(new_token)
-        db.session.add(Token(token=new_token))
+        db.session.add(Token(token=new_token, user_id=new_user.id))
+
+    # these tokens are used by baselines
+    for token in ['baseline-ml', 'baseline-random', 'baseline-mutate']:
+        tokens.append(token)
+        new_user = User(
+            id="user-" + str(token),
+            oracle_calls={},
+            compound_scores={},
+            compound_sas_scores={}
+        )
+        db.session.add(Token(token=token, user_id=new_user.id))
+
+    # to make sure results work correct
+    db.session.add(Result(user_id='user-baseline-ml', metrics={}))
 
     db.session.commit()
 
@@ -72,10 +94,16 @@ def generate_tokens():
         return jsonify({"status": "failure", "message": "Invalid master key"}), 403
 
     tokens = []
-    for _ in range(50):
+    for i in range(50):
+        new_user = User(
+            id="workshop-" + str(i),
+            oracle_calls={},
+            compound_scores={},
+            compound_sas_scores={}
+        )
         new_token = str(uuid4())  # generate a unique token
         tokens.append(new_token)
-        db.session.add(Token(token=new_token))
+        db.session.add(Token(token=new_token, user_id=new_user.id))
 
     db.session.commit()
 

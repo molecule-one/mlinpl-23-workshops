@@ -110,7 +110,7 @@
         <tbody>
             {% for result in results %}
                 <tr>
-                    <td>{{ result.id }}</td>
+                    <td>{{ result.user_id }}</td>
                     {% for value in result.metrics.values() %}
                         <td>{{ value|round(3) }}</td>
                     {% endfor %}

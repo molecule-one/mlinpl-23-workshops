@@ -32,13 +32,8 @@ class FlaskAppClient:
                 self.console.print(f"[yellow]{tb}[/yellow]")
             response.raise_for_status()
 
-    def evaluate_and_add_result(self, compounds, oracle_name, user_token):
-        payload = {
-            "compounds": ",".join(compounds),
-            "oracle_name": oracle_name,
-            "token": user_token
-        }
-        response = requests.post(f"{self.base_url}/evaluate_and_add_result", json=payload)
+    def all_results(self):
+        response = requests.post(f"{self.base_url}/all_results", json={})
         return self._handle_response(response)
 
     def score_compounds_and_update_leaderboard(self, compounds, oracle_name, user_token):
