@@ -99,4 +99,4 @@ def test_call_limits():
     with pytest.raises(HTTPError):
         client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token='test-3', oracle_name='GSK3β')
 
-test_call_limits()
+test_random_exploration_gets_reasonable_score()

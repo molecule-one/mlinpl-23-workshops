@@ -18,7 +18,7 @@ from rich.console import Console
 from sqlalchemy.orm.attributes import flag_modified
 
 from src.sas_score import compute_ertl_score
-from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD, WORKSHOP_ORACLES
+from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD, WORKSHOP_ORACLES, N_JOBS
 from server.models import Result, User, Token
 from src.eval import virtual_screen_TDC
 
@@ -130,7 +130,7 @@ def score_compounds_and_update_leaderboard():
                                 "traceback": tb}), 500
         # HACK: replaces "_server" which is special sequence to differntiate DRD2 from DRD2_server
         sas_scores = _evaluate_synthesizability(compounds)
-        vs_scores = virtual_screen_TDC(compounds, oracle_name)
+        vs_scores = virtual_screen_TDC(compounds, oracle_name, n_jobs=N_JOBS)
         scores = [vs_score if sas_score <= SAS_THRESHOLD else -1 for vs_score, sas_score in zip_equal(vs_scores, sas_scores)]
 
         if user.compound_scores is None:

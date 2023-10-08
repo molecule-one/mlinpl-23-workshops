@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 # CONFIGURATION
 TOP_N = 10
+N_JOBS = int(os.environ.get("N_JOBS", "4")) # used for virtual screening
 SAS_THRESHOLD = 4.0
 MASTER_KEY = os.environ.get("MASTER_KEY", "YourSuperSecretMasterKey")
 # Define predefined call limits for each oracle_name. Adjust as needed.
