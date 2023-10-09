@@ -5,7 +5,7 @@ Before running them, the server database should be restarted.
 
 Run as: py.test server/tests -s
 """
-
+import os
 import shutil
 from pathlib import Path
 from typing import List
@@ -24,11 +24,13 @@ from rich.console import Console
 
 console = Console()
 
+PORT = int(os.environ.get("PORT", "5000"))
+BASE_URL = "http://127.0.0.1:" + str(PORT)
 TEST_TOKEN_PREFIX = 'test-' # test-0, test-1, ...
 
 def test_submitting_compounds_to_workshop_oracles():
     """Submits three simple molecules to the server using token test-0, to all workshop oracles."""
-    client = FlaskAppClient()
+    client = FlaskAppClient(base_url=BASE_URL)
     token = TEST_TOKEN_PREFIX + '0'
 
     # Example for scoring compounds
@@ -46,6 +48,7 @@ def _run_random_exploration(protein, token="test-1", steps=10):
     """Simple random exploration of ZINC. Should get above >0.5 score on each oracle."""
     base_dir = Path("tmp")
     shutil.rmtree(base_dir, ignore_errors=True)
+    client = FlaskAppClient(base_url=BASE_URL)
     loop = RandomLoop(base_dir=base_dir,
                           user_token=token,
                           target=protein)
@@ -54,7 +57,7 @@ def _run_random_exploration(protein, token="test-1", steps=10):
     for step in range(steps):
         console.print(f"[red]Step {step}[/red]")
         candidates = loop.propose_candidates(budget_per_step)
-        loop.test_in_lab_and_save(candidates)
+        loop.test_in_lab_and_save(candidates, client=client)
         result: List[LeadCompound] = loop.load(iteration_id=step)
         all_result += result
         all_result_sorted = sorted(all_result, key=lambda x: x.activity, reverse=True)
@@ -73,7 +76,7 @@ def test_random_exploration_gets_reasonable_score():
 def test_leaderboard_ordering_and_user_names():
     _run_random_exploration('DRD2_server', 'test-2', steps=1)
     _run_random_exploration('DRD2_server', 'test-3', steps=1)
-    client = FlaskAppClient()
+    client = FlaskAppClient(base_url=BASE_URL)
     all_results = client.all_results()
     users = [r['user'] for r in all_results]
     print(users)
@@ -87,16 +90,17 @@ def test_call_limits():
     base_dir = Path("tmp")
     shutil.rmtree(base_dir, ignore_errors=True)
     loop = RandomLoop(base_dir=base_dir,
-                      user_token='test-3',
+                      user_token='test-4',
                       target='GSK3β')
+    client = FlaskAppClient(base_url=BASE_URL)
     # exhaust limit
     candidates = loop.propose_candidates(1000)
-    loop.test_in_lab_and_save(candidates)
+    loop.test_in_lab_and_save(candidates, client=client)
     # run one time more
-    client = FlaskAppClient()
     candidates = loop.propose_candidates(100)
 
     with pytest.raises(HTTPError):
         client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token='test-3', oracle_name='GSK3β')
 
-test_random_exploration_gets_reasonable_score()
+
+test_call_limits()

@@ -82,7 +82,7 @@ class Loop():
             c = sum([json.load(open(f, "r")) for f in all_res], [])
         return list(map(LeadCompound.from_dict, c))
 
-    def test_in_lab_and_save(self, candidates: List[LeadCompound]):
+    def test_in_lab_and_save(self, candidates: List[LeadCompound], client: Optional[FlaskAppClient]=None):
         """Test candidates in the lab and saves the outcome locally.
 
          The compounds are first checked for synthesizability using synthesize() function.
@@ -110,7 +110,6 @@ class Loop():
         else:
             if self.user_token is None:
                 raise ValueError("Please provide user_token to test in the lab.")
-            client = FlaskAppClient()
             response = client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], self.target, self.user_token)
             console.log(response)
             for c, a_score, s_score in zip_equal(candidates, response['compound_scores'], response['compound_sas_scores']):
@@ -122,18 +121,6 @@ class Loop():
         console.log(f"Saving results to {self.base_dir / save_filename}.")
         json.dump([c.to_dict() for c in candidates],
                   open(self.base_dir / save_filename, "w"), indent=2)
-
-    def submit_to_leaderboard(self, candidates: List[LeadCompound]):
-        """Submit the results to the leaderboard."""
-        if self.user_token is None:
-            raise ValueError("Please provide user_token to submit to leaderboard.")
-        self._validate_smiles([c.smiles for c in candidates])
-        client = FlaskAppClient()
-        response = client.evaluate_and_add_result([c.smiles for c in candidates],
-                                                  self.target,
-                                                  self.user_token)
-        console.log(response)
-
 
     @classmethod
     def _validate_smiles(cls, candidates: List[str]):
