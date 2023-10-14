@@ -84,9 +84,6 @@ def score_compounds_and_update_leaderboard():
 
         token_obj = Token.query.get(token)
 
-        print(token)
-        print(token_obj)
-
         if token_obj is None:
             return jsonify({"error": "Invalid token"}), 403
 

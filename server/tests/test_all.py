@@ -69,7 +69,8 @@ def _run_random_exploration(protein, token="test-1", steps=10):
 
 
 def test_random_exploration_gets_reasonable_score():
-    for protein in ['DRD2_server', 'JNK3', 'GSK3β']:
+    for protein in [ 'GSK3β', 'DRD2_server', 'JNK3']:
+        console.log("Testing: " + protein)
         metrics = _run_random_exploration(protein=protein)
         assert metrics['top10'] > 0.1, "Random search should identify reasonable compounds"
 
@@ -102,5 +103,8 @@ def test_call_limits():
     with pytest.raises(HTTPError):
         client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token='test-3', oracle_name='GSK3β')
 
-
+# test_submitting_compounds_to_workshop_oracles()
+print("Exploration")
+test_random_exploration_gets_reasonable_score()
+test_leaderboard_ordering_and_user_names()
 test_call_limits()

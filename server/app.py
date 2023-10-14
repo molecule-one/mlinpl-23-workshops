@@ -14,7 +14,7 @@ call_limits = { # default is +inf
     "JNK3": 10000,
     "GSK3β": 1000
 }
-WORKSHOP_ORACLES = ['DRD2', 'JNK3', 'GSK3β']
+WORKSHOP_ORACLES = ['DRD2', 'GSK3β', 'JNK3']
 
 # App
 app = Flask(__name__)
@@ -22,10 +22,10 @@ path = os.path.abspath(os.getcwd())
 db_path = os.path.join(path, "results.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 # set unlimited overflow size, otherwise fails
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': N_JOBS,  # too large pool leads to server errors
-    'max_overflow': -1  # set to -1 to indicate unlimited overflow
-}
+# app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+#     'pool_size': N_JOBS,  # too large pool leads to server errors
+#     'max_overflow': -1  # set to -1 to indicate unlimited overflow
+# }
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
