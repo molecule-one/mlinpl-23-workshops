@@ -70,7 +70,7 @@ def virtual_screen_TDC(
 
 def run_virtual_screening(compounds: List[RdkitCanonicalSmiles], experiment: Literal["DRD2"] ="DRD2") -> Tuple[Dict, List]:
     """Runs virtual screening for a list of spaces."""
-    if experiment == "DRD2":
+    if experiment == "GSK3β": # choice for workshop
         fnc = virtual_screen_TDC
     else:
         raise NotImplementedError(f"Unknown experiment f{experiment}")

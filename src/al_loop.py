@@ -98,7 +98,7 @@ class Loop():
         # try to synthesize
         synthesizability_scores = self.evaluate_synthesizability(candidates)
         # compute scores (NOTE: implemented this way to be seamless for the user)
-        if self.target == "DRD2":
+        if self.target == "GSK3β": # DRD2 was previous choice
             # this target is evaluated locally as it has unlimited # of calls
             metrics, activity_scores = run_virtual_screening([c.smiles for c in candidates], self.target)
             for c, a_score, s_score in zip_equal(candidates, activity_scores, synthesizability_scores):

@@ -11,9 +11,11 @@ N_JOBS = int(os.environ.get("N_JOBS", "1"))
 SAS_THRESHOLD = 4.0
 MASTER_KEY = os.environ.get("MASTER_KEY", "YourSuperSecretMasterKey")
 # Define predefined call limits for each oracle_name. Adjust as needed.
+# 14.10.2023 choice for workshop
 call_limits = { # default is +inf
     "JNK3": 5000,
-    "GSK3β": 5000
+    # "GSK3β": 5000,
+    "DRD2": 1000
 }
 WORKSHOP_ORACLES = ['DRD2', 'GSK3β', 'JNK3']
 
