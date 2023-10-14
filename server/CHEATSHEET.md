@@ -2,11 +2,27 @@
 
 ## -1. Running server in production (for workshop participants)
 
+First run once
+
+```commandline
+python server/start.py
+```
+
+to initialize the database, then:
+
 ```commandline
 gunicorn -w 4 --worker-connections 4 --worker-class gevent 'server.start:app'
 ```
 
 Best use `server/scripts/start_server.sh` helper script.
+
+To set up ngrok from a server use
+
+```commandline
+ngrok http 8000
+```
+
+This requires setting up ngrok, for which head to the ngrok website.
 
 ## 0. Running server in development mode
 
