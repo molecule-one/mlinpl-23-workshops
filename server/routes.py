@@ -133,12 +133,13 @@ def score_compounds_and_update_leaderboard():
 
         compounds = request.json.get('compounds')
 
-        if len(compounds) > 5000:
-            return jsonify({"error": f"Max compounds that can be scored by one call is 5000"}), 403
 
         if compounds is None:
             return jsonify({"error": "Missing 'compounds' field in the request."}), 500
         compounds = compounds.split(",")
+        if len(compounds) > 5000:
+            return jsonify({"error": f"Max compounds that can be scored by one call is 5000"}), 403
+
         if len(compounds) > n_remaining_calls:
             compounds = np.random.RandomState(777).choice(compounds, n_remaining_calls)
 

@@ -26,6 +26,7 @@ console = Console()
 
 PORT = int(os.environ.get("PORT", "5000"))
 BASE_URL = "http://127.0.0.1:" + str(PORT)
+BASE_URL = "http://3914-195-150-192-85.ngrok-free.app"
 TEST_TOKEN_PREFIX = 'test-' # test-0, test-1, ...
 
 def test_submitting_compounds_to_workshop_oracles():
