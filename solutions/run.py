@@ -1,7 +1,8 @@
 """Search at random in the space of compounds.
 
-Usage: python solutions/run.py -b 1000 -w random
+Usage: PORT=8000 python solutions/run.py -b 1000 -w random -t GSK3β
 """
+import os
 import shutil
 from pathlib import Path
 from typing import List
@@ -11,6 +12,7 @@ import numpy as np
 from rich.console import Console
 import matplotlib.pylab as plt
 
+from src.   server_wrapper import FlaskAppClient
 from src.al_loop import LeadCompound
 from solutions.task1.random_loop import RandomLoop
 from solutions.task2.mutate_loop import MutateLoop
@@ -18,11 +20,18 @@ from solutions.task4.ml_loop import MLLoop
 
 console = Console()
 
+BASEURL = os.environ.get("BASEURL", "http://127.0.0.1:8000")
+
 def run(budget=1000, target="DRD2", purge=False, which="random", steps=10, user_token='test-0'):
     base_dir = Path("solution_{}_search_budget={}_target={}_user={}".format(which, budget, target, user_token))
 
     if purge:
         shutil.rmtree(base_dir, ignore_errors=True)
+
+    if target == "DRD2":
+        client = None
+    else:
+        client = FlaskAppClient(BASEURL)
 
     if which == "random":
         loop = RandomLoop(base_dir=base_dir,
@@ -60,7 +69,7 @@ def run(budget=1000, target="DRD2", purge=False, which="random", steps=10, user_
     for step in range(steps):
         console.print(f"[red]Step {step}[/red]")
         candidates = loop.propose_candidates(budget_per_step)
-        loop.test_in_lab_and_save(candidates)
+        loop.test_in_lab_and_save(candidates, client=client)
         result: List[LeadCompound] = loop.load(iteration_id=step)
         all_result += result
         loop.generate_visualization(iteration_id=step)

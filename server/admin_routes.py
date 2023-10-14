@@ -63,7 +63,7 @@ def reset():
         db.session.add(Token(token=new_token, user_id=new_user.id))
 
     # these tokens are used by baselines
-    for token in ['baseline-ml', 'baseline-random', 'baseline-mutate']:
+    for token in ['baseline-ml', 'baseline-random', 'baseline-mutate', 'baseline-mutate-low-exp']:
         tokens.append(token)
         new_user = User(
             id="user-" + str(token),
