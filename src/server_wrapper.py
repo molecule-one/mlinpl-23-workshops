@@ -36,6 +36,13 @@ class FlaskAppClient:
         response = requests.post(f"{self.base_url}/all_results", json={})
         return self._handle_response(response)
 
+    def all_scores(self, user_token):
+        payload = {
+            "token": user_token
+        }
+        response = requests.post(f"{self.base_url}/all_scores", json=payload)
+        return self._handle_response(response)
+
     def score_compounds_and_update_leaderboard(self, compounds, oracle_name, user_token):
         payload = {
             "compounds": ",".join(compounds),

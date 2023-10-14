@@ -17,6 +17,7 @@ from rdkit import Chem
 from rich.console import Console
 from sqlalchemy.orm.attributes import flag_modified
 
+from server import PORT
 from src.sas_score import compute_ertl_score
 from server.app import TOP_N, db, app, call_limits, SAS_THRESHOLD, WORKSHOP_ORACLES, N_JOBS
 from server.models import Result, User, Token
@@ -61,7 +62,33 @@ def all_results():
 @app.route('/leaderboard')
 def index():
     sorted_results = _get_results_sorted()
-    return render_template('index.html', results=sorted_results)
+    return render_template('index.html', results=sorted_results, port=PORT)
+
+@app.route("/all_scores", methods=['POST', 'GET'])
+def all_scores():
+    token = request.json.get('token')
+
+    # Check if the token is valid
+    if not Token.check_valid_token(token):
+        return jsonify({"error": "Invalid token"}), 403
+
+    token_obj = Token.query.get(token)
+
+    if token_obj is None:
+        return jsonify({"error": "Invalid token"}), 403
+
+    user = User.query.get(token_obj.user_id)
+    if not user:
+        user = User(id=token_obj.user_id, oracle_calls={}, compound_scores={}, compound_sas_scores={})
+        db.session.add(user)
+
+    if user.compound_scores is None:
+        user.compound_scores = {}
+        user.compound_sas_scores = {}
+    db.session.commit()
+
+    return jsonify({"compound_scores": user.compound_scores, "compound_sas_scores": user.compound_sas_scores}), 200
+
 
 @app.route("/score_compounds_and_update_leaderboard", methods=['POST'])
 def score_compounds_and_update_leaderboard():

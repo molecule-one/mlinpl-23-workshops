@@ -2,8 +2,8 @@ import os
 
 from server.routes import *
 from server.admin_routes import *
+from server import PORT
 
-PORT = int(os.environ.get("PORT", "5000"))
 
 if __name__ == "__main__":
     import sklearn

@@ -104,9 +104,28 @@ def test_call_limits():
     with pytest.raises(RuntimeError):
         client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token=token, oracle_name='GSK3β')
 
+def test_get_all_scores():
+    base_dir = Path("tmp")
+    token = 'test-40'
+    shutil.rmtree(base_dir, ignore_errors=True)
+    loop = RandomLoop(base_dir=base_dir,
+                      user_token=token,
+                      target='GSK3β')
+    client = FlaskAppClient(base_url=BASE_URL)
+    # exhaust limit
+    candidates = loop.propose_candidates(100)
+    loop.test_in_lab_and_save(candidates, client=client)
+    # run one time more
+    console.log(client.all_scores(token))
+
+    assert len(client.all_scores(token)['compound_sas_scores']['GSK3β']) == len(candidates)
+    assert len(client.all_scores(token)['compound_scores']['GSK3β']) == len(candidates)
+
+
 if __name__ == "__main__":
     test_submitting_compounds_to_workshop_oracles()
     test_random_exploration_gets_reasonable_score()
     test_leaderboard_ordering_and_user_names()
     test_call_limits()
+    test_get_all_scores()
     console.log("[green] Tests passed [/green]")
