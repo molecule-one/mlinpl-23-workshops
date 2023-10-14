@@ -97,6 +97,8 @@ def score_compounds_and_update_leaderboard():
         if oracle_name not in user.oracle_calls:
             oracle_calls[oracle_name] = 0
 
+
+
         n_remaining_calls = call_limits.get(oracle_name, float('inf')) - user.oracle_calls[oracle_name]
 
         if n_remaining_calls <= 0:
@@ -110,9 +112,15 @@ def score_compounds_and_update_leaderboard():
             compounds = np.random.RandomState(777).choice(compounds, n_remaining_calls)
 
         # update the limit
+        console.log(f"Limits for user {token}:")
+        console.log(oracle_calls)
         oracle_calls[oracle_name] += len(compounds)
+        console.log(oracle_calls)
         user.oracle_calls = oracle_calls # to force sqlalchemy to update the dict
         flag_modified(user, 'oracle_calls')
+        db.session.commit()
+
+        user = User.query.get(token_obj.user_id)
 
         for compound in compounds:
             try:

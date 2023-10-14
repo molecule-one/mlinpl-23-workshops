@@ -3,7 +3,7 @@ Tests for the server.
 
 Before running them, the server database should be restarted.
 
-Run as: py.test server/tests -s
+Run as: python server/tests/test_all.py (don't use py.test as it does not pass env variables easily)
 """
 import os
 import shutil
@@ -89,9 +89,10 @@ def test_leaderboard_ordering_and_user_names():
 
 def test_call_limits():
     base_dir = Path("tmp")
+    token = 'test-10'
     shutil.rmtree(base_dir, ignore_errors=True)
     loop = RandomLoop(base_dir=base_dir,
-                      user_token='test-4',
+                      user_token=token,
                       target='GSK3β')
     client = FlaskAppClient(base_url=BASE_URL)
     # exhaust limit
@@ -100,11 +101,12 @@ def test_call_limits():
     # run one time more
     candidates = loop.propose_candidates(100)
 
-    with pytest.raises(HTTPError):
-        client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token='test-3', oracle_name='GSK3β')
+    with pytest.raises(RuntimeError):
+        client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token=token, oracle_name='GSK3β')
 
-# test_submitting_compounds_to_workshop_oracles()
-print("Exploration")
-test_random_exploration_gets_reasonable_score()
-test_leaderboard_ordering_and_user_names()
-test_call_limits()
+if __name__ == "__main__":
+    test_submitting_compounds_to_workshop_oracles()
+    test_random_exploration_gets_reasonable_score()
+    test_leaderboard_ordering_and_user_names()
+    test_call_limits()
+    console.log("[green] Tests passed [/green]")

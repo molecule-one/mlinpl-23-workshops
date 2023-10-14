@@ -111,7 +111,6 @@ class Loop():
             if self.user_token is None:
                 raise ValueError("Please provide user_token to test in the lab.")
             response = client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], self.target, self.user_token)
-            console.log(response)
             for c, a_score, s_score in zip_equal(candidates, response['compound_scores'], response['compound_sas_scores']):
                 c.activity = a_score
                 c.synth_score = s_score

@@ -49,13 +49,15 @@ Install SQLite Browser and see `results.db` in the working directory.
 To run tests with development server, run 
 
 ```commandline
-py.test server/tests/test_all.py -s
+python server/tests/test_all.py 
 ```
+
+(Don't use py.test)
 
 To run tests with production server, run 
 
 ```commandline
-PORT=8000 py.test server/tests/test_all.py -s
+PORT=8000 python server/tests/test_all.py
 ```
 ## 5. How to run load tests
 

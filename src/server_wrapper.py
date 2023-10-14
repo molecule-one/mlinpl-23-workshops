@@ -30,7 +30,7 @@ class FlaskAppClient:
             self.console.print(f"[red]Server error: {error}[/red]")
             if tb:
                 self.console.print(f"[yellow]{tb}[/yellow]")
-            response.raise_for_status()
+            raise RuntimeError(f"Server error: {error}")
 
     def all_results(self):
         response = requests.post(f"{self.base_url}/all_results", json={})

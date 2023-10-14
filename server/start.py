@@ -1,5 +1,9 @@
+import os
+
 from server.routes import *
 from server.admin_routes import *
+
+PORT = int(os.environ.get("PORT", "5000"))
 
 if __name__ == "__main__":
     import sklearn
@@ -8,4 +12,5 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True)
+    # debug = False is key for PyTDC to work
+    socketio.run(app, debug=False, port=PORT)
