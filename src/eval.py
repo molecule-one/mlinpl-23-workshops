@@ -34,6 +34,10 @@ def virtual_screen_TDC(
     """
     Perform virtual screening in the space for compounds achieving high score according to a selected TDC oracle.
     """
+
+    if n_jobs != 1:
+        raise NotImplementedError("Currently n_jobs > 1 is not implemented: it is not reliable enough")
+
     if n_jobs == 1:
         # Single-process execution (original behavior)
         return _virtual_screen_TDC_worker(oracle_name, compounds, 0)
@@ -51,11 +55,6 @@ def virtual_screen_TDC(
                 chunk = compounds[i:i + chunk_size]
                 console.log(chunk)
                 futures.append(executor.submit(_virtual_screen_TDC_worker, oracle_name, chunk, i // chunk_size))
-
-            time.sleep(1)
-            for i, future in enumerate(futures):
-                if not future.done():
-                    console.log(f"Job {i} is still pending.")
 
             results = []
             for future in as_completed(futures):

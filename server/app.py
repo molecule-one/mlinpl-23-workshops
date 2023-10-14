@@ -13,7 +13,7 @@ MASTER_KEY = os.environ.get("MASTER_KEY", "YourSuperSecretMasterKey")
 # Define predefined call limits for each oracle_name. Adjust as needed.
 call_limits = { # default is +inf
     "JNK3": 5000,
-    "GSK3β": 1000
+    "GSK3β": 5000
 }
 WORKSHOP_ORACLES = ['DRD2', 'GSK3β', 'JNK3']
 

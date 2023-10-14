@@ -144,10 +144,7 @@ def score_compounds_and_update_leaderboard():
             compounds = np.random.RandomState(777).choice(compounds, n_remaining_calls)
 
         # update the limit
-        console.log(f"Limits for user {token}:")
-        console.log(oracle_calls)
         oracle_calls[oracle_name] += len(compounds)
-        console.log(oracle_calls)
         user.oracle_calls = oracle_calls # to force sqlalchemy to update the dict
         flag_modified(user, 'oracle_calls')
         db.session.commit()
@@ -157,6 +154,7 @@ def score_compounds_and_update_leaderboard():
         for compound in compounds:
             try:
                 mol = rdkit.Chem.MolFromSmiles(compound)
+
                 if mol is None:
                     return jsonify(
                         {"error": f"Failed to parse SMILES {compound} (rdkit.Chem.MolFromSmiles(smi) returns None)."}), 500
@@ -172,15 +170,19 @@ def score_compounds_and_update_leaderboard():
 
         if user.compound_scores is None:
             user.compound_scores = {}
+            # user.compounds = {}
             user.compound_sas_scores = {}
 
         current_compound_score_dict = user.compound_scores
+        # current_compounds_dict = user.compounds
         current_compound_sas_score_dict = user.compound_sas_scores
 
         if oracle_name not in user.compound_scores:
             current_compound_score_dict[oracle_name] = []
+            # current_compounds_dict[oracle_name] = []
             current_compound_sas_score_dict[oracle_name] = []
 
+        # current_compounds_dict[oracle_name] += compounds
         current_compound_score_dict[oracle_name] += scores
         current_compound_sas_score_dict[oracle_name] += sas_scores
 
@@ -192,17 +194,13 @@ def score_compounds_and_update_leaderboard():
 
         db.session.commit()
 
-        # note: duplication of code of add_result
         metrics = {}
         for k in [TOP_N]:
             for oracle_name in WORKSHOP_ORACLES:
                 if oracle_name in user.compound_scores:
-                    console.log(oracle_name)
-                    console.log(user.compound_scores[oracle_name])
                     top_ids = np.argsort(user.compound_scores[oracle_name])[-k:]
                     metrics[f"{oracle_name}_top_{k}"] = np.mean([user.compound_scores[oracle_name][i] for i in top_ids])
                 else:
-                    console.log("Missing")
                     metrics[f"{oracle_name}_top_{k}"] = 0.0
 
         result = Result.query.get(user.id)

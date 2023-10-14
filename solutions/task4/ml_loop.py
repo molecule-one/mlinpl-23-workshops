@@ -73,7 +73,9 @@ class MLLoop(Loop):
     def _select_top_N(self, candidates: List[LeadCompound], n_select: int) -> List[LeadCompound]:
         """Ranks candidates by their predicted activity."""
         X_test = self._featurize([c.smiles for c in candidates])
-        y_pred = self._model.predict_proba(X_test)[:, 1]
+        y_pred = self._model.predict_proba(X_test)
+        if y_pred.ndim == 2:
+            y_pred = y_pred[:, -1]
         return [c for _, c in sorted(zip(y_pred, candidates), reverse=True, key=lambda a: a[0])][:n_select]
 
     def propose_candidates(self, n_candidates: int) -> List[LeadCompound]:
