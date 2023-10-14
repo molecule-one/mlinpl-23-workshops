@@ -105,6 +105,10 @@ def score_compounds_and_update_leaderboard():
             return jsonify({"error": f"Call limit reached for oracle: {oracle_name}"}), 403
 
         compounds = request.json.get('compounds')
+
+        if len(compounds) > 5000:
+            return jsonify({"error": f"Max compounds that can be scored by one call is 5000"}), 403
+
         if compounds is None:
             return jsonify({"error": "Missing 'compounds' field in the request."}), 500
         compounds = compounds.split(",")
