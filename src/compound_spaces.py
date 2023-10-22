@@ -5,6 +5,9 @@ from typing import List, Optional
 import numpy as np
 from tdc.generation import MolGen
 from src.utils import RdkitCanonicalSmiles
+from rdkit import Chem
+
+
 class CompoundSpace(metaclass=ABCMeta):
     """Base class for spaces of copounds.
 
@@ -46,7 +49,8 @@ class SmallZINC(CompoundSpace):
     def estimate_size(self) -> float:
         return len(self.smiles)
 
-    def try_sample(self) -> Optional[List[RdkitCanonicalSmiles]]:
-        return [
-            self.rng.choice(self.smiles, 1)[0]
-        ]
+    def try_sample(self, n_molecules=1) -> Optional[List[RdkitCanonicalSmiles]]:
+        return self.rng.choice(self.smiles, n_molecules).tolist()
+
+    def sample(self, n_molecules=1) -> Optional[List[RdkitCanonicalSmiles]]:
+        return list(map(Chem.MolFromSmiles, self.rng.choice(self.smiles, n_molecules)))

@@ -10,7 +10,8 @@ for path in sys.path:
         break
 
 # has to be after the previous block because of the sys path update
-import sascorer
+from src import sascorer
+
 
 def compute_ertl_score(compound: str):
     mol = Chem.MolFromSmiles(compound)
