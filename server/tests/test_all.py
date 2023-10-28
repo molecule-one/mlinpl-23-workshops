@@ -26,7 +26,7 @@ console = Console()
 
 PORT = int(os.environ.get("PORT", "5000"))
 BASE_URL = "http://127.0.0.1:" + str(PORT)
-BASE_URL = "http://3914-195-150-192-85.ngrok-free.app"
+BASE_URL = "http://mlinpl23.ngrok.io"
 TEST_TOKEN_PREFIX = 'test-' # test-0, test-1, ...
 
 def test_submitting_compounds_to_workshop_oracles():
@@ -94,7 +94,7 @@ def test_call_limits():
     shutil.rmtree(base_dir, ignore_errors=True)
     loop = RandomLoop(base_dir=base_dir,
                       user_token=token,
-                      target='GSK3β')
+                      target='DRD2')
     client = FlaskAppClient(base_url=BASE_URL)
     # exhaust limit
     candidates = loop.propose_candidates(1000)
@@ -103,7 +103,7 @@ def test_call_limits():
     candidates = loop.propose_candidates(100)
 
     with pytest.raises(RuntimeError):
-        client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token=token, oracle_name='GSK3β')
+        client.score_compounds_and_update_leaderboard([c.smiles for c in candidates], user_token=token, oracle_name='DRD2')
 
 def test_get_all_scores():
     base_dir = Path("tmp")
@@ -111,14 +111,13 @@ def test_get_all_scores():
     shutil.rmtree(base_dir, ignore_errors=True)
     loop = RandomLoop(base_dir=base_dir,
                       user_token=token,
-                      target='GSK3β')
+                      target='GSK3β_server')
     client = FlaskAppClient(base_url=BASE_URL)
     # exhaust limit
     candidates = loop.propose_candidates(100)
-    loop.test_in_lab_and_save(candidates, client=client)
+    candidates = loop.test_in_lab_and_save(candidates, client=client)
     # run one time more
     console.log(client.all_scores(token))
-
     assert len(client.all_scores(token)['compound_sas_scores']['GSK3β']) == len(candidates)
     assert len(client.all_scores(token)['compound_scores']['GSK3β']) == len(candidates)
 

@@ -121,6 +121,7 @@ class Loop():
         json.dump([c.to_dict() for c in candidates],
                   open(self.base_dir / save_filename, "w"), indent=2)
 
+        return candidates
     @classmethod
     def _validate_smiles(cls, candidates: List[str]):
         """Helper function to check if the SMILES are valid"""
