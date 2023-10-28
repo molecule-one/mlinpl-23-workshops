@@ -8,7 +8,7 @@ class HighThroughputScreening:
     def __init__(self):
         ...
 
-    def test_molecules(self, molecules: Chem.Mol, target: str = "DRD2"):
+    def test_molecules(self, molecules: Chem.Mol, target: str = "GSK3β"):
         oracle = Oracle(name=target)
         smileses = [Chem.MolToSmiles(mol) for mol in molecules]
         preds = oracle(smileses)
