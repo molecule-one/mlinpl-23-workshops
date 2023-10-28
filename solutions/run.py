@@ -28,7 +28,7 @@ def run(budget=1000, target="DRD2", purge=False, which="random", steps=10, user_
     if purge:
         shutil.rmtree(base_dir, ignore_errors=True)
 
-    if target == "DRD2":
+    if target == "GSK3β":
         client = None
     else:
         client = FlaskAppClient(BASEURL)
