@@ -17,6 +17,6 @@ compounds to a leaderboard using various strategies.
 
 1. [Exercise notebook](notebooks/MLinPL_23_Workshops.ipynb): exercises for workshop.
 
-2. [Server README.md](server/README.md): information on using the server behind
+2. [Server README.md](server/README.MD): information on using the server behind
 
 3. [Solution implementation](solutions): implementation of solutions
