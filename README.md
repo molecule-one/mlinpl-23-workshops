@@ -1,7 +1,7 @@
 # Generative drug discovery: a practical introduction
 
 <p align="center">
-<img src="assets/leaderboard.png" alt="isolated" width="200"/>
+<img src="assets/leaderboard.png" alt="isolated" width="600"/>
 </p>
 
 Code support workshops run at the MLinPL 2023 conference. The workshops are centered around submitting
